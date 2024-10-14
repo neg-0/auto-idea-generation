@@ -7,7 +7,10 @@ interface Idea {
   title: string;
   description: string;
   created_at: string;
-  iterations: string[];
+  iterations: {
+    title: string;
+    description: string;
+  }[];
   competitors: string[];
   goals: string[];
   artifacts: string[];
@@ -48,7 +51,10 @@ const IdeaDetails: React.FC = () => {
         <h2 className="text-2xl font-semibold mb-2">Iterations</h2>
         <ul className="list-disc pl-5">
           {idea.iterations.map((iteration, index) => (
-            <li key={index}>{iteration}</li>
+            <li key={index}>
+              <h3 className="font-semibold">{iteration.title}</h3>
+              <p>{iteration.description}</p>
+            </li>
           ))}
         </ul>
       </section>
