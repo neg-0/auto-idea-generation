@@ -1,5 +1,7 @@
 import express from 'express';
 import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const router = express.Router();
 
@@ -22,8 +24,11 @@ router.post('/', async (req, res) => {
     const goals = await generateGoals(refinedIdea);
     const artifacts = await generateArtifacts(refinedIdea, goals);
 
+    // Generate idea title
+    const ideaTitle = await generateIdeaTitle(refinedIdea);
+
     // Store the idea
-    const storedIdea = await storeIdea(refinedIdea, competitors, goals, artifacts);
+    const storedIdea = await storeIdea(ideaTitle, refinedIdea, competitors, goals, artifacts);
 
     res.status(201).json(storedIdea);
   } catch (err) {
@@ -37,6 +42,21 @@ async function generateIdea() {
     prompt: 'Generate a unique SaaS, app, or startup idea'
   });
   return response.data;
+}
+
+async function generateIdeaTitle(idea) {
+  const response = await axios.post(`${LLM_SERVICE_URL}/generate-title`, {
+    prompt: `Generate a title for the following idea: ${idea.description}. The title should be a short, concise, and compelling phrase that captures the essence of the idea.`
+  });
+
+  console.log("idea title response");
+  console.log(response.data);
+
+  // Remove the "Title: " prefix if it exists
+  const title = response.data.title.replace('Title: ', '');
+
+  // Cut off at 255 characters
+  return title.slice(0, 255);
 }
 
 async function researchCompetitors(idea) {
@@ -68,9 +88,10 @@ async function generateArtifacts(idea, goals) {
   return response.data;
 }
 
-async function storeIdea(idea, competitors, goals, artifacts) {
-  const response = await axios.post(`${IDEA_STORAGE_URL}/api/ideas`, {
-    title: idea.title,
+async function storeIdea(ideaTitle, idea, competitors, goals, artifacts) {
+  console.log(idea, competitors, goals, artifacts);
+  const response = await axios.post(`${IDEA_STORAGE_URL}/ideas`, {
+    title: ideaTitle,
     description: idea.description,
     iterations: [idea],
     competitors,

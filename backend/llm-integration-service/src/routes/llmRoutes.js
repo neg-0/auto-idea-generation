@@ -1,7 +1,9 @@
 import express from 'express';
 import axios from 'axios';
+import dotenv from 'dotenv';
 
 const router = express.Router();
+dotenv.config();
 
 const LLM_API_KEY = process.env.LLM_API_KEY;
 const LLM_API_URL = process.env.LLM_API_URL;
@@ -33,6 +35,16 @@ router.post('/generate', async (req, res) => {
     res.json({ title: response, description: "Generated idea description" });
   } catch (err) {
     res.status(500).json({ error: 'Error generating idea' });
+  }
+});
+
+router.post('/generate-title', async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    const response = await generateLLMResponse(prompt);
+    res.json({ title: response });
+  } catch (err) {
+    res.status(500).json({ error: 'Error generating title' });
   }
 });
 
