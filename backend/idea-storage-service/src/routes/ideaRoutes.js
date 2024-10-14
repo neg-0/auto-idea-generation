@@ -37,7 +37,8 @@ router.post('/', async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: 'Error creating idea' });
+    console.error('Error creating idea:', err);
+    res.status(500).json({ error: 'Error creating idea', details: err.message });
   }
 });
 
